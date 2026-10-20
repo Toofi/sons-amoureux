@@ -1,0 +1,163 @@
+<main class="mx-auto flex max-w-3xl flex-col gap-8 px-4 pb-36 pt-8 sm:px-6">
+  <header class="text-center">
+    <h1 class="font-display text-5xl font-black tracking-tight text-ochre sm:text-6xl">Sons amoureux</h1>
+    <p class="mt-1 font-hand text-2xl text-ink-soft">Les lettres qui s'aiment font un seul son ♥</p>
+  </header>
+
+  @for (group of families; track group.family.id) {
+    @let state = settings.familyState(group.family.id);
+    <section class="flex flex-col gap-3" [attr.aria-labelledby]="'fam-' + group.family.id">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <button
+          type="button"
+          class="tape -rotate-1 text-left"
+          [class]="'tape-' + group.family.tape"
+          [class.tape-off]="state === 'none'"
+          [attr.aria-pressed]="state === 'all' ? 'true' : state === 'some' ? 'mixed' : 'false'"
+          (click)="settings.toggleFamily(group.family.id)"
+        >
+          <span aria-hidden="true" class="font-hand text-2xl leading-none">
+            {{ state === 'all' ? '☑' : state === 'some' ? '◩' : '☐' }}
+          </span>
+          <span [id]="'fam-' + group.family.id" class="font-display text-lg font-bold">{{ group.family.label }}</span>
+        </button>
+        <span class="font-hand text-xl text-ink-soft">{{ group.family.description }}</span>
+      </div>
+
+      <ul class="grid grid-cols-3 gap-2 sm:grid-cols-5" role="list">
+        @for (son of group.sons; track son.id) {
+          @let on = settings.isEnabled(son.id);
+          <li>
+            <button
+              type="button"
+              class="flex min-h-16 w-full flex-col items-center justify-center rounded-lg border-2 px-1 py-2 font-read transition"
+              [class]="
+                on
+                  ? 'border-ink bg-white shadow-[2px_2px_0_var(--color-ink)]'
+                  : 'border-dashed border-taupe/60 bg-paper/60 text-ink-soft'
+              "
+              [attr.aria-pressed]="on"
+              [attr.aria-label]="son.graphemes.join(' ou ') + (on ? ', sélectionné' : ', non sélectionné')"
+              (click)="settings.toggle(son.id)"
+            >
+              <span
+                class="font-bold leading-tight"
+                [class]="(on ? 'hl-' + group.family.tape : '') + (son.graphemes.join('').length > 7 ? ' text-lg' : ' text-2xl')"
+              >
+                {{ son.graphemes.join(' · ') }}
+              </span>
+              <span class="mt-1 font-hand text-base leading-none">« {{ son.sound }} »</span>
+            </button>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  <div class="flex flex-wrap justify-center gap-3 font-hand text-xl">
+    <button type="button" class="underline decoration-dotted underline-offset-4" (click)="settings.selectAll()">
+      Tout sélectionner
+    </button>
+    <span aria-hidden="true" class="text-taupe">·</span>
+    <button type="button" class="underline decoration-dotted underline-offset-4" (click)="settings.reset()">
+      Réglages par défaut
+    </button>
+  </div>
+
+  <section class="index-card flex flex-col gap-5 p-5" aria-labelledby="reglages">
+    <h2 id="reglages" class="font-display text-2xl font-bold">Réglages</h2>
+
+    <fieldset class="flex flex-col gap-2">
+      <legend class="mb-2 font-hand text-2xl text-ink-soft">Comment montrer les cartes ?</legend>
+      <div class="grid gap-2 sm:grid-cols-2">
+        <label
+          class="flex cursor-pointer items-start gap-3 rounded-lg border-2 p-3"
+          [class]="settings.mode() === 'entrainement' ? 'border-ink bg-sage-soft' : 'border-dashed border-taupe/60'"
+        >
+          <input
+            type="radio"
+            name="mode"
+            class="mt-1 size-5 accent-sage"
+            [checked]="settings.mode() === 'entrainement'"
+            (change)="settings.mode.set('entrainement')"
+          />
+          <span>
+            <strong class="block">Entraînement</strong>
+            <span class="text-sm text-ink-soft">On lit d'abord, puis on retourne la carte pour vérifier.</span>
+          </span>
+        </label>
+        <label
+          class="flex cursor-pointer items-start gap-3 rounded-lg border-2 p-3"
+          [class]="settings.mode() === 'decouverte' ? 'border-ink bg-sage-soft' : 'border-dashed border-taupe/60'"
+        >
+          <input
+            type="radio"
+            name="mode"
+            class="mt-1 size-5 accent-sage"
+            [checked]="settings.mode() === 'decouverte'"
+            (change)="settings.mode.set('decouverte')"
+          />
+          <span>
+            <strong class="block">Découverte</strong>
+            <span class="text-sm text-ink-soft">Tout est visible tout de suite, pour apprendre.</span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+
+    <div class="flex flex-col gap-3">
+      <span class="font-hand text-2xl text-ink-soft">La voix</span>
+      @if (speech.supported) {
+        <label class="flex flex-col gap-1 text-sm">
+          <span class="font-semibold">Voix</span>
+          <select
+            class="rounded-lg border-2 border-ink bg-white px-3 py-2 font-read text-base"
+            (change)="onVoice($event)"
+          >
+            <option value="" [selected]="!settings.voiceURI()">Automatique (Belgique en priorité)</option>
+            @for (v of speech.frenchVoices(); track v.voiceURI) {
+              <option [value]="v.voiceURI" [selected]="v.voiceURI === settings.voiceURI()">
+                {{ v.name }} ({{ v.lang }})
+              </option>
+            }
+          </select>
+        </label>
+        <label class="flex flex-col gap-1 text-sm">
+          <span class="font-semibold">Vitesse : {{ settings.rate() < 0.75 ? 'lente' : settings.rate() < 0.95 ? 'posée' : 'normale' }}</span>
+          <input
+            type="range"
+            min="0.5"
+            max="1.1"
+            step="0.05"
+            class="accent-rose"
+            [value]="settings.rate()"
+            (input)="onRate($event)"
+          />
+        </label>
+        <button type="button" class="btn-ink self-start bg-white text-base" (click)="testVoice()">
+          <span aria-hidden="true">🔊</span> Tester la voix
+        </button>
+      } @else {
+        <p class="rounded-lg bg-rose-soft p-3 text-sm">
+          Ce navigateur ne sait pas parler 😕 — essaie avec Chrome, Edge ou Safari.
+        </p>
+      }
+    </div>
+  </section>
+</main>
+
+<div class="fixed inset-x-0 bottom-0 border-t border-dot bg-paper/90 px-4 py-4 backdrop-blur">
+  <div class="mx-auto flex max-w-3xl items-center justify-between gap-4">
+    <span class="font-hand text-2xl text-ink-soft">
+      {{ count() }} {{ count() > 1 ? 'cartes' : 'carte' }}
+    </span>
+    <button
+      type="button"
+      class="btn-ink bg-ochre px-8 text-xl disabled:cursor-not-allowed disabled:opacity-40"
+      [disabled]="count() === 0"
+      (click)="start()"
+    >
+      C'est parti !
+    </button>
+  </div>
+</div>
