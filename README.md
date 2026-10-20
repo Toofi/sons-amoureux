@@ -3,7 +3,7 @@
 Petite PWA Angular pour s'entraîner à lire les **sons amoureux** (ou, on, an, ch, ill…) avec des cartes façon Anki.
 
 - Les cartes sont mélangées. **Je sais !** retire la carte du paquet. **À revoir** la remet plus loin dans le paquet (au moins 2 cartes avant de la revoir).
-- Le haut-parleur 🔊 fait dire le son par la synthèse vocale du navigateur. Toucher un mot exemple le fait lire.
+- Toucher un mot exemple le fait lire par la synthèse vocale du navigateur.
 - Le paquet se filtre par famille (voyelles, consonnes, sons mouillés, bonus) ou son par son. Les réglages sont gardés sur l'appareil.
 - Deux modes : **Entraînement** (on lit, puis on retourne la carte) et **Découverte** (tout est visible).
 - À la fin, l'écran récapitule les sons qui ont demandé plus d'essais et propose de rejouer seulement ceux-là.

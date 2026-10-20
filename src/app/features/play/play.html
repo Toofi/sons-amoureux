@@ -35,17 +35,6 @@
 
       <p class="mt-2 font-hand text-4xl leading-none">se dit « {{ c.sound }} »</p>
 
-      <button
-        type="button"
-        class="grid size-20 place-items-center rounded-full border-2 border-ink bg-ochre text-4xl shadow-[3px_3px_0_var(--color-ink)] transition active:translate-y-0.5 active:shadow-[1px_1px_0_var(--color-ink)]"
-        [class.animate-pulse]="speech.speaking()"
-        [attr.aria-label]="'Écouter le son ' + c.sound"
-        [disabled]="!speech.supported"
-        (click)="say()"
-      >
-        <span aria-hidden="true">🔊</span>
-      </button>
-
       @if (c.hint) {
         <p class="max-w-xs font-hand text-2xl leading-tight text-ink-soft">{{ c.hint }}</p>
       }
@@ -56,10 +45,11 @@
             <button
               type="button"
               class="flex w-full items-center gap-4 rounded-lg border border-dashed border-taupe/50 bg-white/70 px-4 py-2 text-left transition hover:bg-white"
-              (click)="sayWord(ex.word)"
+              (click)="sayWord(ex)"
             >
-              <span class="text-4xl" aria-hidden="true">{{ ex.emoji }}</span>
-              <span class="font-read text-3xl"><app-word [word]="ex.word" [tape]="tape()" /></span>
+              <span class="font-read text-3xl">
+                @if (ex.det) {<span class="text-ink-soft">{{ ex.det }} </span>}<app-word [word]="ex.word" [tape]="tape()" />
+              </span>
               <span class="ml-auto text-xl text-ink-soft" aria-hidden="true">🔈</span>
             </button>
           </li>

@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { SessionStore } from '../../core/session.store';
 import { SettingsStore } from '../../core/settings.store';
 import { SpeechService } from '../../core/speech.service';
-import { plainWord, tapeOf } from '../../data/sons';
+import { Example, plainWord, tapeOf } from '../../data/sons';
 import { RoughCircle } from '../../shared/rough-circle';
 import { Word } from '../../shared/word';
 
@@ -41,13 +41,8 @@ export class Play {
     if (this.flippable() && !this.session.revealed()) this.session.reveal();
   }
 
-  protected say(): void {
-    const c = this.card();
-    if (c) this.speech.speak(c.say);
-  }
-
-  protected sayWord(word: string): void {
-    this.speech.speak(plainWord(word));
+  protected sayWord(ex: Example): void {
+    this.speech.speak(ex.det ? `${ex.det} ${plainWord(ex.word)}` : plainWord(ex.word));
   }
 
   protected answer(known: boolean): void {
@@ -68,6 +63,5 @@ export class Play {
     }
     if (e.key === 'ArrowRight') this.answer(true);
     else if (e.key === 'ArrowLeft') this.answer(false);
-    else if (e.key.toLowerCase() === 's') this.say();
   }
 }
